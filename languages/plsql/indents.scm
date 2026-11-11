@@ -24,14 +24,6 @@
   [(kw_is) (kw_as)] @start
   (body) @end) @indent
 
-(func_decl_in_type
-  [(kw_is) (kw_as)] @start
-  (body) @end) @indent
-
-(proc_decl_in_type
-  [(kw_is) (kw_as)] @start
-  (body) @end) @indent
-
 (create_function
   [(kw_is) (kw_as)] @start
   (body) @end) @indent
@@ -66,7 +58,7 @@
 
 (plsql_block
   (kw_begin) @start
-  (end_obj) @end) @indent
+  (end_obj_named) @end) @indent
 
 (plsql_block
   (kw_begin) @start

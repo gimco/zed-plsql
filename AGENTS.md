@@ -7,9 +7,8 @@ Oracle PL/SQL language extension for the Zed editor. Two independent parts:
 - **Language server** — `server/plsql-lsp.js`, started by a tiny Rust shim
   (`src/lib.rs`). See "Language server" below.
 
-The grammar is our own fork and lives in a **separate git repository**
-(see "The grammar" below). Parsing problems are fixed there, not worked
-around here.
+The grammar is a third-party repository pinned in `extension.toml` (see
+"The grammar" below).
 
 ## Repo layout
 
@@ -35,34 +34,29 @@ LICENSE  README.md
 
 ## The grammar
 
-Forked from https://github.com/andreasmaierde/tree-sitter-plsql (MIT, keep
-its copyright notice). While it is developed locally, `extension.toml`
-points at it with a `file://` URL:
+https://github.com/kalmykov-evgeny/tree-sitter-plsql (MIT), pinned by commit
+in `extension.toml`. It is a fork of andreasmaierde/tree-sitter-plsql with
+much wider SQL coverage and an external scanner for keywords. Bump `rev`
+deliberately, never to a branch name, and re-run `scripts/validate.sh`:
+node names do change between revisions.
 
-```toml
-[grammars.plsql]
-repository = "file:///home/gimco/Projects/tree-sitter-plsql"
-rev = "<commit sha in that repo>"
-```
+Things to know about it:
 
-Zed checks out `rev`, so it only ever sees **committed** grammar changes.
-Loop for a grammar fix:
+- `src/parser.c` is ~42 MB (about 46,000 parse states). Zed needs around a
+  minute to compile it and the resulting wasm is ~12 MB.
+- Its README warns that the parser misbehaves above ~48,000 states, so
+  there is little room for grammar changes. Prefer reporting gaps upstream.
+- The tree-sitter CLI caches the compiled parser by language name in
+  `~/.cache/tree-sitter/lib/plsql.so`. When switching between two checkouts
+  of a `plsql` grammar, delete that file or results come from the wrong one.
 
-1. Add the failing construct to a sample in `tests/` (it must show up as an
-   ERROR in `scripts/validate.sh`).
-2. Edit `grammar.js` in the grammar repo, then
-   `tree-sitter generate --abi 14` there (takes a few seconds; ABI 14 keeps
-   older Zed versions working).
-3. `scripts/validate.sh` here — it uses the grammar's working tree, so no
-   commit is needed to iterate. Adjust the `.scm` queries if node shapes
-   changed (an "Invalid node type" / "Impossible pattern" error says so).
-4. Commit in the grammar repo (`grammar.js` and the regenerated `src/`),
-   then put the new SHA in `extension.toml`. `validate.sh` warns when the
-   rev, the working tree and `src/parser.c` are out of step.
-5. In Zed, reinstall the dev extension to pick up the new rev.
-
-Before publishing the extension, push the fork to a public repository and
-replace the `file://` URL with it.
+`/home/gimco/Projects/tree-sitter-plsql` is a local clone with both lines of
+work: branch `main` (our earlier fixes on top of andreasmaierde) and branch
+`kalmykov` (this grammar). To develop the grammar locally again, point
+`extension.toml` at it with a `file://` URL; `validate.sh` then uses that
+working tree in place and warns when `rev`, the working tree and
+`src/parser.c` are out of step. Zed only ever sees committed revisions, and
+a `file://` URL cannot be published.
 
 ## Validating changes
 
@@ -101,15 +95,17 @@ cross-check node shape against `src/node-types.json` in the grammar.
   come from `src/node-types.json`; regenerate groups from there when the
   grammar changes. The generator drops keywords no rule references, so a
   grammar change can both add and remove `kw_*` nodes.
-- The grammar sets `word`, so keywords are matched as whole words:
-  `end_date` or `raise_application_error` are plain identifiers.
+- Keywords are matched as whole words (`word` plus an external scanner):
+  `end_date` or `loop_count` are plain identifiers. A few built-ins are
+  keywords of their own (`kw_raise_application_error`, `kw_row_number`,
+  `kw_sum`, …); `highlights.scm` captures them as `@function.builtin`.
 - Anonymous tokens (operators, `(`, `;`, `"`) are matched as string literals:
   `":=" @operator`.
 - Named identifier fields worth targeting: `fnc_name`, `prc_name`,
   `package_name`, `type_name`, `trigger_name`, `subtype_name`,
   `type_rec_name`, `type_collection_name`, `ref_cursor_name`,
-  `ref_name_parent`, `ref_name`, `label_name` (after `END LOOP` / `EXIT` /
-  `CONTINUE` / `GOTO`), `pragma_name`.
+  `ref_name_parent`, `ref_name`, `table_name`, `view_name`, `column_name`,
+  `constraint_name`, `schema_name`.
 - `body` exists only on definitions (`function_definition`,
   `procedure_definition`, `create_function`, …). Declarations
   (`function_declaration`, `procedure_declaration`) have **no** `body`.
@@ -118,19 +114,18 @@ cross-check node shape against `src/node-types.json` in the grammar.
 - `exception_block` holds `kw_exception` + `exception_handler`s; the handler
   bodies follow `kw_then` inside `exception_handler`.
 
-### Known grammar gaps (expect ERROR nodes; fix them in the grammar repo)
+### Known grammar gaps (expect ERROR nodes)
 
-- Plain SQL DDL/DCL outside PL/SQL (`CREATE TABLE`, `CREATE VIEW`, `GRANT`).
+- DCL and less common DDL (`GRANT`, `REVOKE`, `COMMENT ON`).
 - SQL*Plus commands (`SET SERVEROUTPUT ON`, `PROMPT`).
-- Analytic functions: `f() OVER (PARTITION BY ...)`.
-- `DATE '...'` / `TIMESTAMP '...'` literals, the `MOD` operator.
-- `ALTER ... COMPILE EDITIONABLE`.
-- Expressions are still a flat, hand-rolled rule set (`_expression_*` in
-  `grammar.js`), not a precedence-climbing grammar. Unusual operator mixes
-  may fail; a rewrite is the proper long-term fix.
+- `RETURN t%ROWTYPE` in cursor / `REF CURSOR` declarations (a plain type
+  name works).
+- `ALTER ... COMPILE` with some option combinations.
+- `LISTAGG(DISTINCT ...)`, `@dblink` (deliberate upstream).
 
-`plsql_block` ends in `end_obj` (no semicolon): the `;` of a bare `END;`
-belongs to the enclosing `statement`.
+Quoted identifiers are a single token (no separate `"` nodes), loop/EXIT
+labels have no field (match them positionally), and `plsql_block` ends in
+`end_obj_named` like `body`.
 
 ## Query conventions
 

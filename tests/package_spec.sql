@@ -1,7 +1,7 @@
 -- Package specification.
 CREATE OR REPLACE PACKAGE my_pkg AS
   c_max CONSTANT PLS_INTEGER := 100;
-  CURSOR c_all RETURN employees%ROWTYPE;
+  CURSOR c_all RETURN t_emp_rec;
   FUNCTION get_name(p_id IN NUMBER) RETURN VARCHAR2;
   PROCEDURE run(
     p_x IN OUT NUMBER,

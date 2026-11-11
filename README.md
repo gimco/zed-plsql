@@ -3,8 +3,8 @@
 Oracle PL/SQL language support for the [Zed](https://zed.dev) editor:
 syntax highlighting, auto-indentation, code outline, bracket matching, Vim
 text objects and code navigation (go to definition, find references, hover,
-symbol search, completion). Highlighting is powered by a fork of the
-[tree-sitter-plsql](https://github.com/andreasmaierde/tree-sitter-plsql)
+symbol search, completion). Highlighting is powered by the
+[tree-sitter-plsql](https://github.com/kalmykov-evgeny/tree-sitter-plsql)
 grammar; navigation by a small bundled language server.
 
 ## Features
@@ -76,7 +76,8 @@ Once published: open **Zed → Extensions**, search for **PL/SQL** and install.
    then select this directory.
 
 Zed compiles the tree-sitter grammar automatically (it downloads the
-[wasi-sdk](https://github.com/WebAssembly/wasi-sdk) on first use). Building
+[wasi-sdk](https://github.com/WebAssembly/wasi-sdk) on first use). The
+grammar is large, so this step takes around a minute. Building
 the dev extension also needs Rust installed through
 [rustup](https://rustup.rs); extensions installed from the registry come
 prebuilt.
@@ -100,14 +101,14 @@ in your `settings.json`:
 
 ## Known limitations
 
-The grammar does not yet cover the full Oracle language. Constructs known to
-produce error nodes:
+The grammar covers PL/SQL, DML, queries (analytic functions, `MERGE`,
+hierarchical queries, …) and common DDL (`CREATE TABLE`, `CREATE VIEW`,
+`CREATE SEQUENCE`). Constructs known to produce error nodes:
 
-- Plain SQL DDL and DCL outside PL/SQL: `CREATE TABLE`, `CREATE VIEW`,
-  `GRANT`, …
+- DCL and less common DDL: `GRANT`, `REVOKE`, `COMMENT ON`, …
 - SQL*Plus commands (`SET SERVEROUTPUT ON`, `PROMPT`, …).
-- Analytic functions (`ROW_NUMBER() OVER (PARTITION BY …)`).
-- `DATE '2020-01-01'` / `TIMESTAMP '…'` literals and the `MOD` operator.
+- `RETURN table%ROWTYPE` in cursor and `REF CURSOR` declarations.
+- `LISTAGG(DISTINCT …)` and `@dblink` references.
 
 Keywords, strings and comments are still highlighted inside error nodes;
 outline entries and syntax-aware indentation may be missing there.
@@ -151,7 +152,7 @@ rules over the samples and runs the language server tests (requires the
 
 ## Credits
 
-- Grammar: forked from [andreasmaierde/tree-sitter-plsql](https://github.com/andreasmaierde/tree-sitter-plsql) (MIT).
+- Grammar: [kalmykov-evgeny/tree-sitter-plsql](https://github.com/kalmykov-evgeny/tree-sitter-plsql), a fork of [andreasmaierde/tree-sitter-plsql](https://github.com/andreasmaierde/tree-sitter-plsql) (MIT).
 
 ## License
 

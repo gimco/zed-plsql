@@ -36,18 +36,11 @@
   (kw_procedure) @context
   prc_name: (identifier) @name) @item
 
-(func_decl_in_type
-  (kw_function) @context
-  fnc_name: (identifier) @name) @item
-
-(proc_decl_in_type
-  (kw_procedure) @context
-  prc_name: (identifier) @name) @item
-
 ; Types
 (create_type
   (kw_type) @context
-  type_name: (identifier) @name) @item
+  (plsql_type_source
+    type_name: (identifier) @name)) @item
 
 (create_type_body
   (kw_type) @context
@@ -81,7 +74,15 @@
   .
   (identifier) @name) @item
 
-(cursor_declaration
-  (kw_cursor) @context
-  .
-  (identifier) @name) @item
+; Tables, views, sequences
+(create_table
+  (kw_table) @context
+  table_name: (identifier) @name) @item
+
+(create_view
+  (kw_view) @context
+  view_name: (identifier) @name) @item
+
+(create_sequence
+  (kw_sequence) @context
+  (referenced_element) @name) @item

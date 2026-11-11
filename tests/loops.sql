@@ -1,7 +1,7 @@
 -- Labeled loops, cursor FOR loops over inline queries, REF CURSOR types.
 DECLARE
   TYPE t_cur IS REF CURSOR;
-  TYPE t_emp_cur IS REF CURSOR RETURN employees%ROWTYPE;
+  TYPE t_emp_cur IS REF CURSOR RETURN t_emp_rec;
   v_total NUMBER := 0;
 BEGIN
   <<outer>>

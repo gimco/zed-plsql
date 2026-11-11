@@ -4,22 +4,18 @@
 [
   (function_definition)
   (function_declaration)
-  (func_decl_in_type)
   (element_spec_function_spec)
   (create_function)
   (procedure_definition)
   (procedure_declaration)
-  (proc_decl_in_type)
   (element_spec_procedure_spec)
   (create_procedure)
 ] @function.around
 
 [
   (function_definition (body) @function.inside)
-  (func_decl_in_type (body) @function.inside)
   (create_function (body) @function.inside)
   (procedure_definition (body) @function.inside)
-  (proc_decl_in_type (body) @function.inside)
   (create_procedure (body) @function.inside)
 ]
 

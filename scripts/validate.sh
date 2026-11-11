@@ -35,6 +35,7 @@ case "$repo" in
       git clone --quiet "$repo" "$grammar"
     fi
     if [ "$(git -C "$grammar" rev-parse HEAD)" != "$rev" ]; then
+      git -C "$grammar" remote set-url origin "$repo"
       git -C "$grammar" fetch --quiet origin
       git -C "$grammar" checkout --quiet "$rev"
     fi

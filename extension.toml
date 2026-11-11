@@ -7,10 +7,9 @@ description = "Oracle PL/SQL: highlighting, indentation, outline, go to definiti
 repository = "https://github.com/gimco/zed-plsql"
 
 [grammars.plsql]
-# Local fork of https://github.com/andreasmaierde/tree-sitter-plsql while it
-# is being developed. Replace with the published fork's URL before releasing.
-repository = "https://github.com/andreasmaierde/tree-sitter-plsql"
-rev = "43f49a431a2cd51ea7e2df2b76fd07e15a64874c"
+# Fork of andreasmaierde/tree-sitter-plsql with much wider SQL coverage.
+repository = "https://github.com/kalmykov-evgeny/tree-sitter-plsql"
+rev = "155dce7805684ac8e528be34aec20d43f05c9177"
 
 [language_servers.plsql-lsp]
 name = "PL/SQL Language Server"
