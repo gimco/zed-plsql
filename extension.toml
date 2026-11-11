@@ -2,7 +2,7 @@ id = "plsql"
 name = "PL/SQL"
 version = "0.1.0"
 schema_version = 1
-authors = ["gimco"]
+authors = ["Bruno Orcha García <gimcoo@gmail.com>"]
 description = "Oracle PL/SQL: highlighting, indentation, outline, go to definition and references"
 repository = "https://github.com/gimco/zed-plsql"
 
