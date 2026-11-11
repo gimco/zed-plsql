@@ -1,0 +1,17 @@
+id = "plsql"
+name = "PL/SQL"
+version = "0.1.0"
+schema_version = 1
+authors = ["gimco"]
+description = "Oracle PL/SQL: highlighting, indentation, outline, go to definition and references"
+repository = "https://github.com/gimco/zed-plsql"
+
+[grammars.plsql]
+# Local fork of https://github.com/andreasmaierde/tree-sitter-plsql while it
+# is being developed. Replace with the published fork's URL before releasing.
+repository = "https://github.com/andreasmaierde/tree-sitter-plsql"
+rev = "43f49a431a2cd51ea7e2df2b76fd07e15a64874c"
+
+[language_servers.plsql-lsp]
+name = "PL/SQL Language Server"
+languages = ["PL/SQL"]

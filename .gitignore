@@ -1,0 +1,6 @@
+.cache/
+# Rust / Zed dev-extension build output
+target/
+Cargo.lock
+extension.wasm
+grammars/
